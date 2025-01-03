@@ -21,5 +21,4 @@ export class CreateMovieDto {
         each: true // 각각이 number 이다.
     })
     genreIds: number[];
-
 }

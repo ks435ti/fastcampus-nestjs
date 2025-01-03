@@ -1,5 +1,7 @@
+import { PartialType } from "@nestjs/mapped-types";
 import { ArrayNotEmpty, Contains, Equals, IsAlphanumeric, IsArray, IsBoolean, IsCreditCard, IsDateString, IsDefined, IsDivisibleBy, IsEmpty, IsEnum, isEnum, IsHexColor, IsIn, IsInt, IsLatLong, IsNegative, IsNotEmpty, IsNotIn, IsNumber, IsOptional, IsPositive, IsString, IsUUID, Max, MaxLength, Min, MinLength, NotContains, NotEquals, registerDecorator, Validate, validate, ValidationArguments, ValidationOptions, ValidatorConstraint, ValidatorConstraintInterface } from "class-validator";
 import { number } from "joi";
+import { CreateMovieDto } from "./create-movie.dto";
 enum MovieGenre {
     Fantasy = "fantasy",
     Action = "action"
@@ -28,12 +30,24 @@ function IsPasswordValid(validationOptions?: ValidationOptions) {
         });
     };
 }
-export class UpdateMovieDto {
+export class UpdateMovieDto extends PartialType(CreateMovieDto) {
+
+    /* PartialType 적용
+    @IsNotEmpty()
+    @IsString()
+    @IsOptional()
+    title?: string;
+
 
     @IsNotEmpty()
-    @IsOptional()
     @IsString()
-    title?: string;
+    @IsOptional()
+    detail?: string;
+
+    @IsNotEmpty()
+    @IsNumber()
+    @IsOptional()
+    directorId?: number;
 
     @IsArray()
     @ArrayNotEmpty()
@@ -43,15 +57,8 @@ export class UpdateMovieDto {
     @IsOptional()
     genreIds?: number[];
 
-    @IsNotEmpty()
-    @IsOptional()
-    @IsString()
-    detail?: string;
+    */
 
-    @IsNotEmpty()
-    @IsOptional()
-    @IsNumber()
-    directorId?: number;
     /* class-validator */
     // @IsDefined() // null / undefined 
     // @IsOptional() // 입력 값이 없으면 다른 validator를 실행하지 않음
