@@ -1,4 +1,4 @@
-import { IsDateString, IsNotEmpty, IsString } from "class-validator";
+import { IsDate, IsDateString, IsNotEmpty, IsString } from "class-validator";
 
 export class CreateDirectorDto {
     @IsNotEmpty()
@@ -6,7 +6,7 @@ export class CreateDirectorDto {
     name: string;
 
     @IsNotEmpty()
-    @IsDateString()
+    @IsDate() // main.ts 에서 enableImplicitConversion 설정을 해뒀기 때문에 변환된 다음 IsDate 체크를 하기 때문에 잘 동작한다.
     dob: Date;
 
 

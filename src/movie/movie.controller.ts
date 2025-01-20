@@ -1,10 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, ClassSerializerInterceptor, UsePipes, ValidationPipe, ParseIntPipe, BadRequestException, ParseFloatPipe, NotFoundException, ParseBoolPipe, ParseArrayPipe, ParseUUIDPipe, ParseEnumPipe, DefaultValuePipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, ClassSerializerInterceptor, UsePipes, ValidationPipe, ParseIntPipe, BadRequestException, ParseFloatPipe, NotFoundException, ParseBoolPipe, ParseArrayPipe, ParseUUIDPipe, ParseEnumPipe, DefaultValuePipe, Request, UseGuards } from '@nestjs/common';
 import { MovieService } from './movie.service';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
 import { movieTitleValidationPipe } from './pipe/movie-title-validation.pipe';
-
-
+import { AuthGuard } from 'src/auth/guard/auth.guard';
+import { Public } from 'src/auth/decorator/public.decorator';
+import { RBAC } from 'src/auth/decorator/rbac.decorator';
+import { Role } from 'src/user/entities/user.entity';
+import { GetMoviesDto } from './dto/get-movies.dto';
 
 
 @Controller('movie')
@@ -13,15 +16,20 @@ export class MovieController {
   constructor(private readonly movieService: MovieService) { }
 
   @Get()
+  @Public()
   findAll(
-    @Query('title', movieTitleValidationPipe) title?: string
+    // @Request() req: any,
+    @Query() dto?: GetMoviesDto,
   ) {
+    // console.log(req.user);
     // Controller 역할 : title 쿼리의 타입이 string 타입인지?
-    return this.movieService.findAll(title);
+    return this.movieService.findAll(dto);
   }
 
   @Get(':id')
+  @Public()
   findOne(@Param('id',
+    ParseIntPipe
     //    new ParseIntPipe({
     //   exceptionFactory(error) {
     //     throw new BadRequestException('숫자를 입력해 주세요' + error);
@@ -41,6 +49,7 @@ export class MovieController {
   }
 
   @Post()
+  @RBAC(Role.admin)
   create(
     @Body() body: CreateMovieDto,
   ) {
@@ -48,6 +57,7 @@ export class MovieController {
   }
 
   @Patch(':id')
+  @RBAC(Role.admin)
   update(@Param('id', ParseIntPipe) id: number,
     @Body() body: UpdateMovieDto,
   ) {
@@ -55,6 +65,7 @@ export class MovieController {
   }
 
   @Delete(':id')
+  @RBAC(Role.admin)
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.movieService.remove(id);
   }

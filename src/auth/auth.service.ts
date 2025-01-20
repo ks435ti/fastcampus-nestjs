@@ -22,13 +22,13 @@ export class AuthService {
         // ['Basic', '$token']
         const basicSplit = rawToken.split(' ');
         if (basicSplit.length !== 2) {
-            throw new BadRequestException("토큰 포멧이 잘못됐습니다.");
+            throw new BadRequestException("토큰 포멧이 잘못됐습니다.1");
         }
 
         const [basic, token] = basicSplit;
 
         if (basic.toLocaleLowerCase() !== 'basic') {
-            throw new BadRequestException('토큰 포맷이 잘못됐습니다.');
+            throw new BadRequestException('토큰 포맷이 잘못됐습니다.2');
         }
 
         /// 2) 추출한 토큰을 base64 디코딩해서 이메일과 비밀번호로 나눈다.
@@ -36,23 +36,24 @@ export class AuthService {
         // 'email:password
         const tokenSplit = decoded.split(':');
         if (tokenSplit.length !== 2) {
-            throw new BadRequestException("토큰 포멧이 잘못됐습니다.");
+            throw new BadRequestException("토큰 포멧이 잘못됐습니다.3");
         }
         const [email, password] = tokenSplit;
         return { email, password };
     }
+
     async parseBearerToken(rawToken: string, isRefreshToken: boolean) {
         // 1) 토큰을 ' ' 기준으로 스필릿 한 후 토큰 값만 추출하기
         // ['Bearer', '$token']
         const bearerSplit = rawToken.split(' ');
         if (bearerSplit.length !== 2) {
-            throw new BadRequestException("토큰 포멧이 잘못됐습니다.");
+            throw new BadRequestException("토큰 포멧이 잘못됐습니다.4");
         }
 
         const [bearer, token] = bearerSplit;
 
         if (bearer.toLocaleLowerCase() !== 'bearer') {
-            throw new BadRequestException('토큰 포맷이 잘못됐습니다.');
+            throw new BadRequestException('토큰 포맷이 잘못됐습니다.5');
         }
         try {
 
