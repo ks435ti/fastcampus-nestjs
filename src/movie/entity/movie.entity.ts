@@ -28,6 +28,11 @@ export class Movie extends BaseTable {
     // @Column()
     // genre: string;
 
+    @Column({
+        default: 0,
+    })
+    likeCount: number;
+
     @ManyToMany(
         () => Genre,
         (genre) => genre.movies,
@@ -44,6 +49,8 @@ export class Movie extends BaseTable {
     )
     @JoinColumn() // 소유자 지정 : movie가 상세를 가지고 있다.
     detail: MovieDetail;
+
+
 
     @ManyToOne(
         () => Director,
