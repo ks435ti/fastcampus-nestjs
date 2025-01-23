@@ -14,9 +14,17 @@ import { UserModule } from './user/user.module';
 import { User } from './user/entities/user.entity';
 import { envVariableKeys } from './common/const/env.const';
 import { BearerTokenMiddleware } from './auth/middleware/bearer-token.middleware';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AuthGuard } from './auth/guard/auth.guard';
 import { RBACGuard } from './auth/guard/rbac.guard';
+import { ResponseTimeInterceptor } from './common/interceptor/response-time.interceptor';
+import { ForbiddenExceptionFilter } from './common/filter/forbidden.filter';
+import { QueryFailedExceptionFilter } from './common/filter/query-failed.filter';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+import { MovieUserLike } from './movie/entity/movie-user-like.entity';
+import { CacheModule } from '@nestjs/cache-manager';
+import { ThrottleInterceptor } from './common/interceptor/throttle.interceptor';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -55,6 +63,7 @@ import { RBACGuard } from './auth/guard/rbac.guard';
         entities: [
           Movie,
           MovieDetail,
+          MovieUserLike,
           Director,
           Genre,
           User
@@ -62,6 +71,14 @@ import { RBACGuard } from './auth/guard/rbac.guard';
         synchronize: true,
       }),
       inject: [ConfigService]
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), 'public'),
+      serveRoot: '/public/'
+    }),
+    CacheModule.register({
+      ttl: 3000,
+      isGlobal: true,
     }),
     MovieModule,
     DirectorModule,
@@ -76,7 +93,25 @@ import { RBACGuard } from './auth/guard/rbac.guard';
     { // RBACGuard 는 AuthGuard 다음에 실행되어야 한다. 그렇지 않으면 RBACGuard의 !user 에서 무조건 걸린다.
       provide: APP_GUARD,
       useClass: RBACGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ResponseTimeInterceptor,
+    },
+    // {
+    //   provide: APP_FILTER, // 모든 forbidden 을 잡아서 귀찮음 공부를 위해 넣어놓음거임
+    //   useClass: ForbiddenExceptionFilter,
+    // },
+    {
+      provide: APP_FILTER,
+      useClass: QueryFailedExceptionFilter,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ThrottleInterceptor
     }
+  ],
+  controllers: [
   ]
 })
 export class AppModule implements NestModule {

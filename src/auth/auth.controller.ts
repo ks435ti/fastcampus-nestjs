@@ -1,4 +1,4 @@
-import { Controller, Post, Headers, UseGuards, Request, Get, Head } from '@nestjs/common';
+import { Controller, Post, Headers, UseGuards, Request, Get, Head, Body } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { LocalAuthGard } from './strategy/local.strategy';
@@ -41,6 +41,14 @@ export class AuthController {
       refreshToken: await this.authService.issueToken(req.user, true),
       accessToken: await this.authService.issueToken(req.user, false)
     };
+  }
+
+  @Post('token/block')
+  /// RBAC 같은 걸로 특정 권한만 블락 시킬수 있는 기능 구현 가능
+  blockToken(
+    @Body('token') token: string,
+  ) {
+    return this.authService.tokenBlock(token);
   }
 
   @UseGuards(JwtAuthGard)

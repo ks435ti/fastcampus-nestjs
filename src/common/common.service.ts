@@ -2,7 +2,6 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 import { SelectQueryBuilder } from "typeorm";
 import { PagePagenationDto } from "./dto/page-pagination.dto";
 import { CursorPaginationDto } from "./dto/cursor-pagination.dto";
-import { dir } from "console";
 
 @Injectable()
 export class CommonService {

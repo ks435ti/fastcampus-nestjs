@@ -1,9 +1,11 @@
 import { Exclude, Expose, Transform } from "class-transformer";
 import { BaseTable } from "src/common/entity/base-table.entity";
-import { ChildEntity, Column, CreateDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToOne, PrimaryGeneratedColumn, TableInheritance, Unique, UpdateDateColumn, VersionColumn } from "typeorm";
+import { ChildEntity, Column, CreateDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, TableInheritance, Unique, UpdateDateColumn, VersionColumn } from "typeorm";
 import { MovieDetail } from "./movie-detail.entity";
 import { Director } from "src/director/entity/director.entity";
 import { Genre } from "src/genre/entity/genre.entity";
+import { User } from "src/user/entities/user.entity";
+import { MovieUserLike } from "./movie-user-like.entity";
 
 
 /// Many to One  : Director -> 감독은 여러개의 영화를 만들수 있음
@@ -16,6 +18,12 @@ export class Movie extends BaseTable {
 
     @PrimaryGeneratedColumn()
     id: number;
+
+    @ManyToOne(
+        () => User,
+        (user) => user.createdMovies
+    )
+    creator: User;
 
     @Column({
         unique: true
@@ -50,7 +58,9 @@ export class Movie extends BaseTable {
     @JoinColumn() // 소유자 지정 : movie가 상세를 가지고 있다.
     detail: MovieDetail;
 
-
+    @Column()
+    @Transform(({ value }) => `http://localhost:3000/${value}`)
+    movieFilePath: string;
 
     @ManyToOne(
         () => Director,
@@ -61,6 +71,13 @@ export class Movie extends BaseTable {
         }
     )
     director: Director;
+
+    @OneToMany(
+        () => MovieUserLike,
+        (mul) => mul.movie,
+    )
+    likedUsers: MovieUserLike[];
+
 
 
 }
