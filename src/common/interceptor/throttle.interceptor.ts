@@ -47,9 +47,9 @@ export class ThrottleInterceptor implements NestInterceptor {
                 tap(
                     async () => {
                         const count = await this.cacheManager.get<number>(key) ?? 0;
-                        console.log(2222, ",  ", count);
+                        // console.log(2222, ",  ", count);
                         var a = await this.cacheManager.set(key, count + 1, 10000); // TODO: 시간을  sec 로 하고 싶은데 어떻게?
-                        console.log(2222, a);
+                        // console.log(2222, a);
 
                     }
                 )

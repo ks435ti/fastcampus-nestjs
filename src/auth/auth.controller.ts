@@ -4,21 +4,27 @@ import { AuthGuard } from '@nestjs/passport';
 import { LocalAuthGard } from './strategy/local.strategy';
 import { JwtAuthGard } from './strategy/jwt.strategy';
 import { Public } from './decorator/public.decorator';
+import { ApiBasicAuth, ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Authorization } from './decorator/authorization.decorator';
 
 @Controller('auth')
+@ApiTags('myAuth') // endpoint를 그룹화 할수 있음
+@ApiBearerAuth()
 export class AuthController {
   constructor(private readonly authService: AuthService) { }
 
   @Public()
+  @ApiBasicAuth()
   @Post("register")
   // authorization : Basic $token
-  registerUser(@Headers('authorization') token: string) {
+  registerUser(@Authorization() token: string) {
     return this.authService.registor(token);
   }
 
   @Public()
+  @ApiBasicAuth()
   @Post('login')
-  loginUser(@Headers('authorization') token: string) {
+  loginUser(@Authorization() token: string) {
     return this.authService.login(token);
   }
 

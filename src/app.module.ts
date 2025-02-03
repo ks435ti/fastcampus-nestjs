@@ -25,6 +25,10 @@ import { join } from 'path';
 import { MovieUserLike } from './movie/entity/movie-user-like.entity';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ThrottleInterceptor } from './common/interceptor/throttle.interceptor';
+import { ScheduleModule } from '@nestjs/schedule';
+import { WinstonModule } from 'nest-winston';
+import * as winston from 'winston';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -76,9 +80,32 @@ import { ThrottleInterceptor } from './common/interceptor/throttle.interceptor';
       rootPath: join(process.cwd(), 'public'),
       serveRoot: '/public/'
     }),
-    CacheModule.register({
+    CacheModule.register({ /// redis register 설정만 하면 기존 cache manager  그래도 사용하면 된다.
       ttl: 3000,
       isGlobal: true,
+    }),
+    ScheduleModule.forRoot(),
+    WinstonModule.forRoot({
+      level: 'debug',
+      transports: [
+        new winston.transports.Console({
+          format: winston.format.combine(
+            winston.format.colorize({
+              all: true,
+            }),
+            winston.format.timestamp(),
+            winston.format.printf(info => `${info.timestamp} [${info.context}] ${info.level} ${info.message}`)
+          )
+        }),
+        new winston.transports.File({
+          dirname: join(process.cwd(), 'logs'),
+          filename: 'logs.log',
+          format: winston.format.combine(
+            winston.format.timestamp(),
+            winston.format.printf(info => `${info.timestamp} [${info.context}] ${info.level} ${info.message}`)
+          )
+        }),
+      ],
     }),
     MovieModule,
     DirectorModule,
@@ -112,22 +139,31 @@ import { ThrottleInterceptor } from './common/interceptor/throttle.interceptor';
     }
   ],
   controllers: [
+
   ]
 })
+
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(
       BearerTokenMiddleware,
-    ).exclude({
-      path: 'auth/login',
-      method: RequestMethod.POST,
-    }, {
-      path: 'auth/register',
-      method: RequestMethod.POST,
-    }, {
-      path: 'auth/login/passport',
-      method: RequestMethod.POST,
-    })
+    ).exclude(
+      {
+        path: 'auth/login',
+        method: RequestMethod.POST,
+        // version: "1",
+        // version: ["1", "2"],
+      },
+      {
+        path: 'auth/register',
+        method: RequestMethod.POST,
+        // version: "1",
+      },
+      // {
+      //   path: 'auth/login/passport',
+      //   method: RequestMethod.POST,
+      // }
+    )
       .forRoutes('*');
   }
 }

@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, ClassSerializerInterceptor, UsePipes, ValidationPipe, ParseIntPipe, BadRequestException, ParseFloatPipe, NotFoundException, ParseBoolPipe, ParseArrayPipe, ParseUUIDPipe, ParseEnumPipe, DefaultValuePipe, Request, UseGuards, UploadedFile, UploadedFiles } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, ClassSerializerInterceptor, UsePipes, ValidationPipe, ParseIntPipe, BadRequestException, ParseFloatPipe, NotFoundException, ParseBoolPipe, ParseArrayPipe, ParseUUIDPipe, ParseEnumPipe, DefaultValuePipe, Request, UseGuards, UploadedFile, UploadedFiles, Version, VERSION_NEUTRAL } from '@nestjs/common';
 import { MovieService } from './movie.service';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
-import { movieTitleValidationPipe } from './pipe/movie-title-validation.pipe';
+import { MovieTitleValidationPipe } from './pipe/movie-title-validation.pipe';
 import { AuthGuard } from 'src/auth/guard/auth.guard';
 import { Public } from 'src/auth/decorator/public.decorator';
 import { RBAC } from 'src/auth/decorator/rbac.decorator';
@@ -16,12 +16,30 @@ import { QueryRunner } from 'src/common/decorator/query-runner.decorator';
 import { QueryRunner as QR } from 'typeorm';
 import { CacheKey, CacheTTL, CacheInterceptor as CI } from '@nestjs/cache-manager';
 import { Throttle } from 'src/common/decorator/throttle.decorator';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+// @Controller({
+//   path: 'movie',
+//   version: '2',
+// })
+// export class MovieController2 {
+//   @Get()
+//   getMovies() {
+//     return [];
+//   }
+// }
 
-@Controller('movie')
+@Controller({
+  path: 'movie',
+  // version: VERSION_NEUTRAL,
+})
+@ApiTags('myMovie') // endpoint를 그룹화 할수 있음
+@ApiBearerAuth()
 @UseInterceptors(ClassSerializerInterceptor)
 export class MovieController {
-  constructor(private readonly movieService: MovieService) { }
+  constructor(
+    private readonly movieService: MovieService
+  ) { }
 
   @Get()
   @Public()
@@ -29,6 +47,20 @@ export class MovieController {
   @Throttle({
     count: 5,
     unit: "minute"
+  })
+  // @Version('5')
+  // @Version(["1", '3', '5'])
+  @ApiOperation({
+    description: "[Movie]를 pagination 하는 API"
+  })
+  @ApiResponse({ // 여러개 넣을수 있음
+    status: 200,
+    description: '성공적으로 API Pagination을 실행 했을때'
+    ,
+  }) @ApiResponse({
+    status: 400,
+    description: 'Pagination 데이터를 잘못 입력 했을때'
+    ,
   })
   findAll(
     // @Request() req: any,
@@ -41,7 +73,7 @@ export class MovieController {
   }
 
   @Get('recent')
-  @UseInterceptors(CI) // 기본키로 경로를 사용한다, cachekey로 키를 지정하면 param에따라 경로가 달라도 인지하지 못한다.
+  @UseInterceptors(CI) // 기본키로 경로를 사용한다, @CacheKey("key")로 키를 지정하면 @Param에따라 경로가 달라도 인지하지 못한다.
   @CacheKey('getMoviesRecent')
   @CacheTTL(1000) // 모듈에서 지정한값을 오버라이드 한다.
   getMoviesRecent() {

@@ -1,7 +1,9 @@
-import { PartialType } from "@nestjs/mapped-types";
+// import { PartialType } from "@nestjs/mapped-types";
 import { ArrayNotEmpty, Contains, Equals, IsAlphanumeric, IsArray, IsBoolean, IsCreditCard, IsDateString, IsDefined, IsDivisibleBy, IsEmpty, IsEnum, isEnum, IsHexColor, IsIn, IsInt, IsLatLong, IsNegative, IsNotEmpty, IsNotIn, IsNumber, IsOptional, IsPositive, IsString, IsUUID, Max, MaxLength, Min, MinLength, NotContains, NotEquals, registerDecorator, Validate, validate, ValidationArguments, ValidationOptions, ValidatorConstraint, ValidatorConstraintInterface } from "class-validator";
 import { number } from "joi";
 import { CreateMovieDto } from "./create-movie.dto";
+import { PartialType } from "@nestjs/swagger";
+
 enum MovieGenre {
     Fantasy = "fantasy",
     Action = "action"
@@ -20,6 +22,7 @@ class PasswordValidator implements ValidatorConstraintInterface {
     }
 
 }
+
 function IsPasswordValid(validationOptions?: ValidationOptions) {
     return function (object: Object, propertyName: string) {
         registerDecorator({
@@ -30,6 +33,7 @@ function IsPasswordValid(validationOptions?: ValidationOptions) {
         });
     };
 }
+
 export class UpdateMovieDto extends PartialType(CreateMovieDto) {
 
     /* PartialType 적용

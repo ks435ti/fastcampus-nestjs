@@ -2,8 +2,11 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from 
 import { DirectorService } from './director.service';
 import { CreateDirectorDto } from './dto/create-director.dto';
 import { UpdateDirectorDto } from './dto/update-director.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @Controller('director')
+@ApiTags('myDirector') // endpoint를 그룹화 할수 있음
+@ApiBearerAuth()
 export class DirectorController {
   constructor(private readonly directorService: DirectorService) { }
 

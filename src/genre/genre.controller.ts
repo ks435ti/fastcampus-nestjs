@@ -2,8 +2,11 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from 
 import { GenreService } from './genre.service';
 import { CreateGenreDto } from './dto/create-genre.dto';
 import { UpdateGenreDto } from './dto/update-genre.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @Controller('genre')
+@ApiTags('myGenre') // endpoint를 그룹화 할수 있음
+@ApiBearerAuth()
 export class GenreController {
   constructor(private readonly genreService: GenreService) { }
 

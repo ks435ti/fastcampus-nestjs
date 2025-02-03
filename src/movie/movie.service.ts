@@ -13,9 +13,8 @@ import { join } from 'path';
 import { rename } from "fs/promises";
 import { User } from 'src/user/entities/user.entity';
 import { MovieUserLike } from './entity/movie-user-like.entity';
-import { callbackify } from 'util';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
-import { privateDecrypt } from 'crypto';
+import { MovieRemove } from './usecase/remove/remove.usecase';
 
 @Injectable()
 export class MovieService
@@ -37,7 +36,8 @@ export class MovieService
     private readonly dataSource: DataSource,
     private readonly commonService: CommonService,
     @Inject(CACHE_MANAGER)
-    private readonly cacheManater: Cache
+    private readonly cacheManater: Cache,
+    private readonly movieRemoveUsecase: MovieRemove
   ) { }
 
 
@@ -87,7 +87,7 @@ export class MovieService
     let [data, count] = await qb.getManyAndCount();
     if (userId) {
       const movieIds = data.map(movie => movie.id);
-      let likedMovies;
+      let likedMovies: MovieUserLike[];
       try {
         likedMovies = movieIds.length < 1 ? [] : await this.getLikedMovies(movieIds, userId);
 
@@ -131,6 +131,7 @@ export class MovieService
     //   relations: ["director", "genres"]
     // });
   }
+
   async findOne(id: number) {
     const qb = await this.movieRepository.createQueryBuilder('movie')
       .leftJoinAndSelect('movie.director', 'director')
@@ -308,30 +309,33 @@ export class MovieService
       qr.rollbackTransaction();
       throw e;
     }
-    finally { qr.release(); }
+    finally {
+      qr.release();
+    }
 
 
   }
 
   async remove(id: number) {
-    const movie = await this.movieRepository.findOne({
-      where: {
-        id,
-      }, relations: ["detail"]
-    });
+    return this.movieRemoveUsecase.remove(id);
+    // const movie = await this.movieRepository.findOne({
+    //   where: {
+    //     id,
+    //   }, relations: ["detail"]
+    // });
 
-    if (!movie) {
-      throw new NotFoundException('존재하지  않는 ID 값의 영화 입니다.');
-    }
+    // if (!movie) {
+    //   throw new NotFoundException('존재하지  않는 ID 값의 영화 입니다.');
+    // }
 
-    await this.movieRepository.createQueryBuilder()
-      .delete()
-      .where('id=:id', { id })
-      .execute();
-    // await this.movieRepository.delete(id);
+    // await this.movieRepository.createQueryBuilder()
+    //   .delete()
+    //   .where('id=:id', { id })
+    //   .execute();
+    // // await this.movieRepository.delete(id);
 
-    await this.movieDetailRepository.delete(movie.detail.id);
-    return id;
+    // await this.movieDetailRepository.delete(movie.detail.id);
+    // return id;
   }
 
   async toggleMovieLike(movieId: number, userId: number, isLike: boolean) {

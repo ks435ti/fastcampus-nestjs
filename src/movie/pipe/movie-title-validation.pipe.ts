@@ -1,6 +1,6 @@
 import { ArgumentMetadata, BadRequestException, PipeTransform } from "@nestjs/common";
 
-export class movieTitleValidationPipe implements PipeTransform<string, string> {
+export class MovieTitleValidationPipe implements PipeTransform<string, string> {
     transform(value: string, metadata: ArgumentMetadata): string {
         if (!value) return value;
 

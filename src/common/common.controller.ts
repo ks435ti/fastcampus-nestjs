@@ -1,7 +1,10 @@
 import { BadRequestException, Controller, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @Controller('common')
+@ApiTags('myCommon') // endpoint를 그룹화 할수 있음
+@ApiBearerAuth()
 export class CommonController {
     @Post('video')
     @UseInterceptors(FileInterceptor(

@@ -46,7 +46,7 @@ export class BearerTokenMiddleware implements NestMiddleware {
                 envVariableKeys.refreshTokenSecret :
                 envVariableKeys.accessTokenSecret;
 
-            const payload = await this.jwtService.verifyAsync(token, { // 페이로드 검증`
+            const payload = await this.jwtService.verifyAsync(token, { // 페이로드 검증
                 secret: this.configService.get<string>(secretKey)
             });
 
@@ -57,7 +57,7 @@ export class BearerTokenMiddleware implements NestMiddleware {
             const differenceInSeconds = expiryDate - now / 1000;
 
             await this.cacheManager.set(tokenKey, payload,
-                Math.max((differenceInSeconds - 30) * 1000, 1) // ms
+                Math.max((differenceInSeconds - 30) * 1000, 1) // ms // 30을 뺀건 오차가 발생할수 있어서...
             );
 
 
